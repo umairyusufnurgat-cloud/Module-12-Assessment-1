@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Contact Book</title>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        .search-box { margin-bottom: 20px; }
+        .add-form { margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; }
+        .add-form input { margin: 5px; padding: 8px; width: 200px; }
+        .add-form button { padding: 8px 15px; background: #007cba; color: white; border: none; cursor: pointer; }
+        .contact-item { padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; }
+        .contact-info { flex-grow: 1; }
+        .contact-name { font-weight: bold; }
+        .contact-phone { color: #666; margin-left: 10px; }
+        .contact-email { color: #888; font-size: 0.9em; }
+        .contact-actions button { margin-left: 5px; padding: 5px 10px; cursor: pointer; }
+        .delete-btn { background: #dc3545; color: white; border: none; }
+        .edit-btn { background: #28a745; color: white; border: none; }
+        .search-box input { padding: 10px; width: 300px; font-size: 16px; }
+        .stats { margin-bottom: 15px; color: #666; }
+    </style>
+</head>
+<body>
+    <h1>📞 Contact Book</h1>
+    
+    <div class="stats" id="stats"></div>
+    
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="🔍 Search contacts by name, phone, or email" onkeyup="searchContacts()">
+    </div>
+    
+    <div class="add-form">
+        <h3>Add New Contact</h3>
+        <input type="text" id="nameInput" placeholder="Full Name" required>
+        <input type="tel" id="phoneInput" placeholder="Phone Number" required>
+        <input type="email" id="emailInput" placeholder="Email Address">
+        <button onclick="addContact()">Add Contact</button>
+    </div>
+    
+    <div id="contactList"></div>
+
+    <script>
+        let contacts = [
+            {name: "John Smith", phone: "555-0123", email: "john.smith@email.com"},
+            {name: "Jane Doe", phone: "555-0456", email: "jane.doe@email.com"},
+            {name: "Bob Johnson", phone: "555-0789", email: "bob.johnson@email.com"},
+            {name: "Alice Brown", phone: "555-0321", email: "alice.brown@email.com"},
+            {name: "Mike Davis", phone: "555-0654", email: "mike.davis@email.com"},
+            {name: "Sarah Wilson", phone: "555-0987", email: "sarah.wilson@email.com"},
+            {name: "Tom Anderson", phone: "555-0246", email: "tom.anderson@email.com"},
+            {name: "Lisa Garcia", phone: "555-0135", email: "lisa.garcia@email.com"}
+        ];
+
+        function displayContacts(contactsToShow = contacts) {
+            const list = document.getElementById('contactList');
+            const stats = document.getElementById('stats');
+            
+            stats.innerHTML = `Total Contacts: ${contacts.length} | Showing: ${contactsToShow.length}`;
+            
+            if (contactsToShow.length === 0) {
+                list.innerHTML = '<div style="text-align: center; padding: 20px; color: #666;">No contacts found</div>';
+                return;
+            }
+            
+            list.innerHTML = '';
+            contactsToShow.forEach((contact, index) => {
+                const originalIndex = contacts.indexOf(contact);
+                list.innerHTML += `
+                    <div class="contact-item">
+                        <div class="contact-info">
+                            <span class="contact-name">${contact.name}</span>
+                            <span class="contact-phone">${contact.phone}</span>
+                            <div class="contact-email">${contact.email || 'No email'}</div>
+                        </div>
+                        <div class="contact-actions">
+                            <button class="edit-btn" onclick="editContact(${originalIndex})">Edit</button>
+                            <button class="delete-btn" onclick="deleteContact(${originalIndex})">Delete</button>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function addContact() {
+            const name = document.getElementById('nameInput').value.trim();
+            const phone = document.getElementById('phoneInput').value.trim();
+            const email = document.getElementById('emailInput').value.trim();
+            
+            if (!name || !phone) {
+                alert('Name and phone are required!');
+                return;
+            }
+            
+            if (contacts.some(c => c.name.toLowerCase() === name.toLowerCase())) {
+                alert('Contact with this name already exists!');
+                return;
+            }
+            
+            contacts.push({name, phone, email});
+            contacts.sort((a, b) => a.name.localeCompare(b.name));
+            
+            document.getElementById('nameInput').value = '';
+            document.getElementById('phoneInput').value = '';
+            document.getElementById('emailInput').value = '';
+            
+            displayContacts();
+            alert('Contact added successfully!');
+        }
+
+        function deleteContact(index) {
+            if (confirm(`Delete ${contacts[index].name}?`)) {
+                contacts.splice(index, 1);
+                displayContacts();
+            }
+        }
+        
+        function editContact(index) {
+            const contact = contacts[index];
+            const newName = prompt('Edit name:', contact.name);
+            const newPhone = prompt('Edit phone:', contact.phone);
+            const newEmail = prompt('Edit email:', contact.email || '');
+            
+            if (newName && newPhone) {
+                contacts[index] = {name: newName.trim(), phone: newPhone.trim(), email: newEmail.trim()};
+                contacts.sort((a, b) => a.name.localeCompare(b.name));
+                displayContacts();
+            }
+        }
+
+        function searchContacts() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = contacts.filter(contact => 
+                contact.name.toLowerCase().includes(search) ||
+                contact.phone.includes(search) ||
+                (contact.email && contact.email.toLowerCase().includes(search))
+            );
+            displayContacts(filtered);
+        }
+
+        displayContacts();
+    </script>
+</body>
+</html>
